@@ -1,2 +1,2 @@
 
-worker: node start
+worker: npm start

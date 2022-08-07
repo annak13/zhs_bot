@@ -1,23 +1,29 @@
-require("dotenv").config()
-const { Client, GatewayIntentBits } = require('discord.js')
-const fs = require("fs")
-const { REST } = require("@discordjs/rest")
-const { Routes } = require("discord-api-types/v9")
+require("dotenv").config() //Wieder Dotenv für unseren Token und Später unsere Application ID
+const fs = require("fs") //Fs (Filesystem) (Datein auslesen aus command files)
+const { REST } = require("@discordjs/rest") //REST Client um die Commands zu regestrieren
+const { Routes } = require('discord-api-types/v9'); //API Types um die REST Route für ApplicationCommands zu bekommen
+const commands = [] //Später kommen hier unsere Commands aus den Files rein
 
-const commands = []
+//Mit FS den Ordner "commands" durchgehen und nur JS Datein akzeptieren
+const commandFiles = fs.readdirSync('./src/commands').filter(file => file.endsWith('.js')); 
 
-const commandFiles = fs.readdirSync("./src/commands").filter(file => file.endsWith(".js"))
-
-
-commandFiles.forEach(commandFile => {
+//Commandfiles Durchgehen und durch require das Module (den Command) laden und in unser Array hinzufügen (toJSON wegen Discordjs Builders)
+commandFiles.forEach((commandFile) => {
     const command = require(`./commands/${commandFile}`)
     commands.push(command.data.toJSON())
-
 })
 
-const restClient = new REST({version: "9"}).setToken(process.env.TOKEN)
+//RestClient zum Erstellen der Commands regestrieren
+const restClient = new REST({ version: "9" }).setToken(process.env.TOKEN)
 
+//Guild ID und Discord Appliction ID noch im .env festlegen
+
+//PUT Webrequest mit der Route und der ApplicationID und der GuildID an Discord Senden und wenns funktioniert hat eine Nachricht ausgeben
+//Für Global Commands die Guild ID entfernen und Routes.applicationCommands stattdessen nutzen
 restClient.put(Routes.applicationGuildCommands(process.env.APP_ID, process.env.GUILD_ID),
-{body: commands})
-.then(() => console.log("successfully registered commands"))
-.catch(() => console.log("error registering commands"))
+    { body: commands })
+    .then(() => console.log("Sucessfully registered Commands!"))
+    .catch(console.error)
+
+
+//Danach in der package.json als Script erstellen   

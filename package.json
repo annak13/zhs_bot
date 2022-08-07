@@ -6,9 +6,13 @@
     "node": "16.x"
   },
   "scripts": {
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "deployCommands": "node src/deploy-commands.js"
   },
   "dependencies": {
+    "@discordjs/builders": "^1.1.0",
+    "@discordjs/rest": "^1.0.1",
+    "discord-api-types": "^0.37.1",
     "discord.js": "^14.1.2",
     "dotenv": "^16.0.1"
   }

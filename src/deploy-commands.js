@@ -7,6 +7,7 @@ const commands = [] //Später kommen hier unsere Commands aus den Files rein
 //Mit FS den Ordner "commands" durchgehen und nur JS Datein akzeptieren
 const commandFiles = fs.readdirSync('./src/commands').filter(file => file.endsWith('.js')); 
 
+console.log(commandFiles)
 //Commandfiles Durchgehen und durch require das Module (den Command) laden und in unser Array hinzufügen (toJSON wegen Discordjs Builders)
 commandFiles.forEach((commandFile) => {
     const command = require(`./commands/${commandFile}`)

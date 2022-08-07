@@ -1,11 +1,6 @@
 
 const fetch  = require("node-fetch");
 const { JSDOM } = require("jsdom");
-//  import { JSDOM } from "jsdom";
-
-// import fetch from "node-fetch";
-
-
 
   
 async function getDocuments(arrURLs) {

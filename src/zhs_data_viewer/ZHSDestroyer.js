@@ -198,13 +198,19 @@ module.exports = {
       });
     });
   });
-  return CheckForAvailableCourts(
+  let arrDictAvailableCourts = CheckForAvailableCourts(
     arrDictURLsDays,
     optionFromHour,
     optionFromMinute,
     optionToHour,
     optionToMinute
   );
+  let strDictAvailableCourts = "";
+  arrDictAvailableCourts.forEach(function (dictAvailableCourts) {
+    strDictAvailableCourts = strDictAvailableCourts + JSON.stringify(dictAvailableCourts)
+  });
+
+  return strDictAvailableCourts;
 }
 
 

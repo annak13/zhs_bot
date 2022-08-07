@@ -17,7 +17,10 @@ module.exports = {
 	//Das ist unsere Methode, wo wir unsere Interaction abfangen, diese ist async
 	async execute(interaction) {
 		//Mit Pong antworten
-		await interaction.reply( await getAvailableCourts());
+		const answer = await (await getAvailableCourts(
+			optionDays=[2],14)).toString();
+		console.log(answer);
+		await interaction.reply(answer);
 
 
 		/*Andere Optionen, zu Antworten

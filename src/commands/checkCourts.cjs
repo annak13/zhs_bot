@@ -3,7 +3,7 @@ const { SlashCommandBuilder } = require("@discordjs/builders");
 
 // import { getAvailableCourts } from "./zhs_data_viewer/ZHSDestroyer.js";
 
-const { getAvailableCourts } = require("../zhs_data_viewer/ZHSDestroyer");
+const { getAvailableCourts } = require("../zhs_data_viewer/ZHSDestroyer.cjs");
 
 
 //Wir exportieren in unserem File, den Command mit module.exports

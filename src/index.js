@@ -8,7 +8,7 @@ const client = new Client({ intents: [] });
 
 client.commands = new Collection()
 
-const commandFiles = fs.readdirSync("./src/commands").filter(file => file.endsWith(". js"))
+const commandFiles = fs.readdirSync("./src/commands").filter(file => file.endsWith(".js"))
 console.log("tt")
 console.log(commandFiles)
 

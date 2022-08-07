@@ -9,11 +9,14 @@ const client = new Client({ intents: [] });
 client.commands = new Collection()
 
 const commandFiles = fs.readdirSync("./src/commands").filter(file => file.endsWith(". cjs"))
-
+console.log("tt")
+console.log(commandFiles)
 
 commandFiles.forEach(commandFile => {
     const command = require(`./commands/${commandFile}`)
     client.commands.set(command.data.name, command)
+	console.log(commandFile)
+	console.log("nd of commands")
 })
 
 client.once('ready', () => {

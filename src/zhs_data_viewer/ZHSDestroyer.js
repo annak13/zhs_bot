@@ -1,9 +1,9 @@
 
-// const fetch  = require("node-fetch");
+const fetch  = require("node-fetch");
 const { JSDOM } = require("jsdom");
 //  import { JSDOM } from "jsdom";
 
-import fetch from "node-fetch";
+// import fetch from "node-fetch";
 
 
 

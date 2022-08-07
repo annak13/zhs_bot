@@ -3,7 +3,7 @@ const { SlashCommandBuilder } = require("@discordjs/builders");
 
 // import { getAvailableCourts } from "./zhs_data_viewer/ZHSDestroyer.js";
 
-const { getAvailableCourts } = require("../zhs_data_viewer/ZHSDestroyer.cjs");
+const { getAvailableCourts } = require("../zhs_data_viewer/ZHSDestroyer.js");
 
 
 //Wir exportieren in unserem File, den Command mit module.exports
@@ -12,12 +12,12 @@ module.exports = {
 
 	//Wir erstellen den Slash Command
 	data: new SlashCommandBuilder()
-		.setName('checkCourts')
+		.setName('checkcourts')
 		.setDescription('All available slots!'),
 	//Das ist unsere Methode, wo wir unsere Interaction abfangen, diese ist async
 	async execute(interaction) {
 		//Mit Pong antworten
-		await interaction.reply(getAvailableCourts());
+		await interaction.reply( await getAvailableCourts());
 
 
 		/*Andere Optionen, zu Antworten

@@ -1,8 +1,6 @@
-
-const fetch  = require("node-fetch");
+const fetch = require("node-fetch");
 const { JSDOM } = require("jsdom");
 
-  
 async function getDocuments(arrURLs) {
   let arrDocs = [];
   for (let i = 0; i < arrURLs.length; i++) {
@@ -154,64 +152,72 @@ function getURLs(arrDates) {
   return arrDictURLsDays;
 }
 
-
+function generateStringView(arrDictAvailableCourts) {
+  let strView = "";
+  arrDictAvailableCourts.forEach(function (dictAvailableCourts) {
+    let strDay = String(dictAvailableCourts.Day.getDate()).padStart(2, "0");
+    let strCourt = dictAvailableCourts.Court.replace(/\D/gmi, "").padStart(2, "0");
+    let strHour = String(dictAvailableCourts.Timeslot.From.getHours()).padStart(2, "0");
+    let strMinute = String(dictAvailableCourts.Timeslot.From.getMinutes()).padStart(2, "0");
+    strView =
+      strView + strDay + "_" + strCourt + "_" + strHour + strMinute + "\n";
+  });
+  return strView;
+}
 
 module.exports = {
-  async  getAvailableCourts(
+  async getAvailableCourts(
     optionDays = [0, 1, 2, 3, 4, 5, 6],
     optionFromHour = 0,
     optionFromMinute = 0,
     optionToHour = 23,
     optionToMinute = 59
   ) {
-  let arrDates = getArrayOfDays(optionDays);
-  let arrDictURLsDays = getURLs(arrDates);
+    let arrDates = getArrayOfDays(optionDays);
+    let arrDictURLsDays = getURLs(arrDates);
 
-  for (let i = 0; i < arrDictURLsDays.length; i++) {
-    const dictCourts = arrDictURLsDays[i];
-    let arrDocs = await getDocuments(dictCourts.Courts);
-    let arrArrTables = getTables(arrDocs);
-    let arrDictTables = getDictTables(arrArrTables);
-    dictCourts.Courts = arrDictTables;
-  }
+    for (let i = 0; i < arrDictURLsDays.length; i++) {
+      const dictCourts = arrDictURLsDays[i];
+      let arrDocs = await getDocuments(dictCourts.Courts);
+      let arrArrTables = getTables(arrDocs);
+      let arrDictTables = getDictTables(arrArrTables);
+      dictCourts.Courts = arrDictTables;
+    }
 
-  arrDictURLsDays.forEach((dictCourts) => {
-    let tempDay = new Date(new Date(dictCourts.Day).setHours(0, 0, 0, 0));
-    dictCourts.Day = new Date(new Date(dictCourts.Day).setHours(0, 0, 0, 0));
-    dictCourts.Courts.forEach((dictCourts) => {
-      dictCourts.Times.forEach((Time) => {
-        let dictTimeslot = {
-          From: new Date(),
-          To: new Date(),
-        };
-        let hoursFrom = parseInt(Time.Timeslot.split(" - ")[0].split(":")[0]);
-        let minutesFrom = parseInt(Time.Timeslot.split(" - ")[0].split(":")[1]);
-        let hoursTo = parseInt(Time.Timeslot.split(" - ")[1].split(":")[0]);
-        let minutesTo = parseInt(Time.Timeslot.split(" - ")[1].split(":")[1]);
-        dictTimeslot.From = new Date(
-          new Date(tempDay).setHours(hoursFrom, minutesFrom, 0, 0)
-        );
-        dictTimeslot.To = new Date(
-          new Date(tempDay).setHours(hoursTo, minutesTo, 0, 0)
-        );
-        Time.Timeslot = dictTimeslot;
+    arrDictURLsDays.forEach((dictCourts) => {
+      let tempDay = new Date(new Date(dictCourts.Day).setHours(0, 0, 0, 0));
+      dictCourts.Day = new Date(new Date(dictCourts.Day).setHours(0, 0, 0, 0));
+      dictCourts.Courts.forEach((dictCourts) => {
+        dictCourts.Times.forEach((Time) => {
+          let dictTimeslot = {
+            From: new Date(),
+            To: new Date(),
+          };
+          let hoursFrom = parseInt(Time.Timeslot.split(" - ")[0].split(":")[0]);
+          let minutesFrom = parseInt(
+            Time.Timeslot.split(" - ")[0].split(":")[1]
+          );
+          let hoursTo = parseInt(Time.Timeslot.split(" - ")[1].split(":")[0]);
+          let minutesTo = parseInt(Time.Timeslot.split(" - ")[1].split(":")[1]);
+          dictTimeslot.From = new Date(
+            new Date(tempDay).setHours(hoursFrom, minutesFrom, 0, 0)
+          );
+          dictTimeslot.To = new Date(
+            new Date(tempDay).setHours(hoursTo, minutesTo, 0, 0)
+          );
+          Time.Timeslot = dictTimeslot;
+        });
       });
     });
-  });
-  let arrDictAvailableCourts = CheckForAvailableCourts(
-    arrDictURLsDays,
-    optionFromHour,
-    optionFromMinute,
-    optionToHour,
-    optionToMinute
-  );
-  let strDictAvailableCourts = "";
-  arrDictAvailableCourts.forEach(function (dictAvailableCourts) {
-    strDictAvailableCourts = strDictAvailableCourts + JSON.stringify(dictAvailableCourts)
-  });
+    let arrDictAvailableCourts = CheckForAvailableCourts(
+      arrDictURLsDays,
+      optionFromHour,
+      optionFromMinute,
+      optionToHour,
+      optionToMinute
+    );
+    let strDictAvailableCourts = generateStringView(arrDictAvailableCourts);
 
-  return strDictAvailableCourts;
-}
-
-
-}
+    return strDictAvailableCourts;
+  },
+};

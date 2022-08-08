@@ -17,13 +17,12 @@ module.exports = {
 	//Das ist unsere Methode, wo wir unsere Interaction abfangen, diese ist async
 	async execute(interaction) {
 		//Mit Pong antworten
-		const answer = await (await getAvailableCourts(
-			optionDays=[2],14)).toString();
+		const answer = await (await getAvailableCourts([1,2],17));
 		console.log(answer);
 		await interaction.reply(answer);
 
 
-		/*Andere Optionen, zu Antworten
+		/*Andere Optionen, zu Antworten 
 			interaction.reply({content: "Pong!"});
 		    interaction.reply({content: "Pong!", embeds: []});
 			interaction.reply({content: "Pong!", ephemeral: true});

@@ -11,6 +11,7 @@ module.exports = {
 	async execute(interaction) {
 		//Mit Pong antworten
 		await interaction.reply('Pong!');
+		await interaction.followUp('Test!');
 
 		/*Andere Optionen, zu Antworten
 			interaction.reply({content: "Pong!"});

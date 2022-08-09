@@ -2,12 +2,12 @@ const fetch = require("node-fetch");
 const { JSDOM } = require("jsdom");
 
 async function getDocuments(arrURLs) {
-  let arrDocs = [];
+  let promiseArrDocs = [];
   for (let i = 0; i < arrURLs.length; i++) {
     const strURL = arrURLs[i];
-    let doc = await getDocumentFromURL(strURL);
-    arrDocs.push(doc);
+    promiseArrDocs.push(getDocumentFromURL(strURL));
   }
+  let arrDocs = await Promise.all(promiseArrDocs);
   return arrDocs;
 }
 
@@ -153,16 +153,24 @@ function getURLs(arrDates) {
 }
 
 function generateStringView(arrDictAvailableCourts) {
-  let strView = "";
+  let arrView = [];
   arrDictAvailableCourts.forEach(function (dictAvailableCourts) {
     let strDay = String(dictAvailableCourts.Day.getDate()).padStart(2, "0");
-    let strCourt = dictAvailableCourts.Court.replace(/\D/gmi, "").padStart(2, "0");
-    let strHour = String(dictAvailableCourts.Timeslot.From.getHours()).padStart(2, "0");
-    let strMinute = String(dictAvailableCourts.Timeslot.From.getMinutes()).padStart(2, "0");
-    strView =
-      strView + strDay + "_" + strCourt + "_" + strHour + strMinute + "\n";
+    let strCourt = dictAvailableCourts.Court.replace(/\D/gim, "").padStart(
+      2,
+      "0"
+    );
+    let strHour = String(dictAvailableCourts.Timeslot.From.getHours()).padStart(
+      2,
+      "0"
+    );
+    let strMinute = String(
+      dictAvailableCourts.Timeslot.From.getMinutes()
+    ).padStart(2, "0");
+    arrView.push(strDay + "_" + strCourt + "_" + strHour + strMinute);
   });
-  return strView;
+  
+  return arrView;
 }
 
 module.exports = {
@@ -175,11 +183,16 @@ module.exports = {
   ) {
     let arrDates = getArrayOfDays(optionDays);
     let arrDictURLsDays = getURLs(arrDates);
+    let arrRequests = [];
+    for (let i = 0; i < arrDictURLsDays.length; i++) {
+      const dictCourts = arrDictURLsDays[i];
+      arrRequests.push(getDocuments(dictCourts.Courts));
+    }
+    let arrArrDocs = await Promise.all(arrRequests);
 
     for (let i = 0; i < arrDictURLsDays.length; i++) {
       const dictCourts = arrDictURLsDays[i];
-      let arrDocs = await getDocuments(dictCourts.Courts);
-      let arrArrTables = getTables(arrDocs);
+      let arrArrTables = getTables(arrArrDocs[i]);
       let arrDictTables = getDictTables(arrArrTables);
       dictCourts.Courts = arrDictTables;
     }
@@ -216,8 +229,8 @@ module.exports = {
       optionToHour,
       optionToMinute
     );
-    let strDictAvailableCourts = generateStringView(arrDictAvailableCourts);
+    let arrStrDictAvailableCourts = generateStringView(arrDictAvailableCourts);
 
-    return strDictAvailableCourts;
+    return arrStrDictAvailableCourts;
   },
 };

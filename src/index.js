@@ -7,17 +7,15 @@ const { Client, Collection } = require("discord.js");
 const client = new Client({ intents: [] });
 
 client.on("ready", async () => {
-  var waitMillseconds = 1.5 * 60000;
+  var waitMillseconds = 5 * 60000;
   let arrCourts = [];
   let arrTempCourts = [];
   const channel = await client.channels.fetch(process.env.CHANNEL_ID);
   setInterval(async function () {
     arrCourts = await getAvailableCourts();
     let arrAnswer = getStrView(findDifferences(arrCourts, arrTempCourts));
-    console.log(arrCourts);
-    console.log(arrAnswer);
-    console.log(arrTempCourts);
-    console.log();
+
+    console.log(Date.now());
     arrTempCourts = arrCourts;
     if (Array.isArray(arrAnswer) && arrAnswer.length) {
       for (let i = 0; i < arrAnswer.length; i++) {

@@ -1,108 +1,5 @@
-import { JSDOM } from "jsdom";
-import fetch from "node-fetch";
-
-export async function getAvailableCourts(
-  optionDays = [0, 1, 2, 3, 4, 5, 6],
-  optionFromHour = 0,
-  optionFromMinute = 0,
-  optionToHour = 23,
-  optionToMinute = 59
-) {
-  let arrDates = getArrayOfDays(optionDays);
-  let arrDictURLsDays = getURLs(arrDates);
-  let arrRequests = [];
-  for (let i = 0; i < arrDictURLsDays.length; i++) {
-    const dictCourts = arrDictURLsDays[i];
-    arrRequests.push(getDocuments(dictCourts.Courts));
-  }
-  let arrArrDocs = await Promise.all(arrRequests);
-
-  for (let i = 0; i < arrDictURLsDays.length; i++) {
-    const dictCourts = arrDictURLsDays[i];
-    let arrArrTables = getTables(arrArrDocs[i]);
-    let arrDictTables = getDictTables(arrArrTables);
-    dictCourts.Courts = arrDictTables;
-  }
-
-  arrDictURLsDays.forEach((dictCourts) => {
-    let tempDay = new Date(new Date(dictCourts.Day).setHours(0, 0, 0, 0));
-    dictCourts.Day = new Date(new Date(dictCourts.Day).setHours(0, 0, 0, 0));
-    dictCourts.Courts.forEach((dictCourts) => {
-      dictCourts.Times.forEach((Time) => {
-        let dictTimeslot = {
-          From: new Date(),
-          To: new Date(),
-        };
-        const regex = /^\d{2}:\d{2}\s-\s\d{2}:\d{2}$/;
-        if (regex.test(Time.Timeslot)) {
-          let hoursFrom = parseInt(Time.Timeslot.split(" - ")[0].split(":")[0]);
-          let minutesFrom = parseInt(Time.Timeslot.split(" - ")[0].split(":")[1]);
-          let hoursTo = parseInt(Time.Timeslot.split(" - ")[1].split(":")[0]);
-          let minutesTo = parseInt(Time.Timeslot.split(" - ")[1].split(":")[1]);
-          dictTimeslot.From = new Date(
-            new Date(tempDay).setHours(hoursFrom, minutesFrom, 0, 0)
-          );
-          dictTimeslot.To = new Date(
-            new Date(tempDay).setHours(hoursTo, minutesTo, 0, 0)
-          );
-          Time.Timeslot = dictTimeslot;
-        } else {
-          Time.Timeslot = "err_format";
-        }
-      });
-    });
-  });
-  let arrDictAvailableCourts = CheckForAvailableCourts(
-    arrDictURLsDays,
-    optionFromHour,
-    optionFromMinute,
-    optionToHour,
-    optionToMinute
-  );
-  let strDictAvailableCourts = generateStringView(arrDictAvailableCourts);
-
-  return strDictAvailableCourts;
-}
-
-function getArrayOfDays(optionDays) {
-  let arrDates = [];
-  for (let i = 0; i < 9; i++) {
-    var date = new Date();
-    date.setDate(date.getDate() + i);
-    let dayInWeek = date.getDay();
-    if (optionDays.includes(dayInWeek)) {
-      var numDay = String(date.getDate()).padStart(2, "0");
-      var numMonth = String(date.getMonth() + 1).padStart(2, "0");
-      var numYear = date.getFullYear();
-      var strDate = numYear + "-" + numMonth + "-" + numDay;
-      arrDates.push(strDate);
-    }
-  }
-  return arrDates;
-}
-
-function getURLs(arrDates) {
-  let arrPages = [2, 3, 4];
-  let arrDictURLsDays = [];
-  arrDates.forEach(function (date) {
-    let arrURLs = [];
-    let dictCourts = {
-      Day: date,
-      Courts: [],
-    };
-    arrPages.forEach(function (pageNumber) {
-      var strURL =
-        "https://ssl.forumedia.eu/zhs-courtbuchung.de/reservations.php?action=showReservations&type_id=1&date=" +
-        date +
-        "&page=" +
-        pageNumber;
-      arrURLs.push(strURL);
-    });
-    dictCourts.Courts = arrURLs;
-    arrDictURLsDays.push(dictCourts);
-  });
-  return arrDictURLsDays;
-}
+const fetch = require("node-fetch");
+const { JSDOM } = require("jsdom");
 
 async function getDocuments(arrURLs) {
   let promiseArrDocs = [];
@@ -191,7 +88,7 @@ function CheckForAvailableCourts(
           dictTimes.Timeslot.From >=
             dayTemp.setHours(optionFromHour, optionFromMinute) &&
           dictTimes.Timeslot.To <=
-            dayTemp.setHours(optionToHour, optionToMinute) && dictTimes.Timeslot != "err_format"
+            dayTemp.setHours(optionToHour, optionToMinute)
         ) {
           let dictAvailableCourt = {
             Day: new Date(),
@@ -215,6 +112,46 @@ function CheckForAvailableCourts(
   return arrDictAvailableCourts;
 }
 
+function getArrayOfDays(optionDays) {
+  let arrDates = [];
+  for (let i = 0; i < 9; i++) {
+    var date = new Date();
+    date.setDate(date.getDate() + i);
+    let dayInWeek = date.getDay();
+    if (optionDays.includes(dayInWeek)) {
+      var numDay = String(date.getDate()).padStart(2, "0");
+      var numMonth = String(date.getMonth() + 1).padStart(2, "0");
+      var numYear = date.getFullYear();
+      var strDate = numYear + "-" + numMonth + "-" + numDay;
+      arrDates.push(strDate);
+    }
+  }
+  return arrDates;
+}
+
+function getURLs(arrDates) {
+  let arrPages = [2, 3, 4];
+  let arrDictURLsDays = [];
+  arrDates.forEach(function (date) {
+    let arrURLs = [];
+    let dictCourts = {
+      Day: date,
+      Courts: [],
+    };
+    arrPages.forEach(function (pageNumber) {
+      var strURL =
+        "https://ssl.forumedia.eu/zhs-courtbuchung.de/reservations.php?action=showReservations&type_id=1&date=" +
+        date +
+        "&page=" +
+        pageNumber;
+      arrURLs.push(strURL);
+    });
+    dictCourts.Courts = arrURLs;
+    arrDictURLsDays.push(dictCourts);
+  });
+  return arrDictURLsDays;
+}
+
 function generateStringView(arrDictAvailableCourts) {
   let arrView = [];
   arrDictAvailableCourts.forEach(function (dictAvailableCourts) {
@@ -230,24 +167,70 @@ function generateStringView(arrDictAvailableCourts) {
     let strMinute = String(
       dictAvailableCourts.Timeslot.From.getMinutes()
     ).padStart(2, "0");
-    // strView =
-    //   strView + strDay + "_" + strCourt + "_" + strHour + strMinute + "\n";
     arrView.push(strDay + "_" + strCourt + "_" + strHour + strMinute);
   });
-  // return strView;
-  let arrStrView = [];
-  let strView = "";
-  for (let i = 0; i < arrView.length; i++) {
-    if (strView.length >= 1900) {
-      arrStrView.push(strView);
-      strView = "";
-      i--;
-    } else {
-      strView = strView + arrView[i] + "\n"
-    }
-    if (i === arrView.length - 1) {
-      arrStrView.push(strView);
-    }
-  }
-  return arrStrView;
+  
+  return arrView;
 }
+
+module.exports = {
+  async getAvailableCourts(
+    optionDays = [0, 1, 2, 3, 4, 5, 6],
+    optionFromHour = 0,
+    optionFromMinute = 0,
+    optionToHour = 23,
+    optionToMinute = 59
+  ) {
+    let arrDates = getArrayOfDays(optionDays);
+    let arrDictURLsDays = getURLs(arrDates);
+    let arrRequests = [];
+    for (let i = 0; i < arrDictURLsDays.length; i++) {
+      const dictCourts = arrDictURLsDays[i];
+      arrRequests.push(getDocuments(dictCourts.Courts));
+    }
+    let arrArrDocs = await Promise.all(arrRequests);
+
+    for (let i = 0; i < arrDictURLsDays.length; i++) {
+      const dictCourts = arrDictURLsDays[i];
+      let arrArrTables = getTables(arrArrDocs[i]);
+      let arrDictTables = getDictTables(arrArrTables);
+      dictCourts.Courts = arrDictTables;
+    }
+
+    arrDictURLsDays.forEach((dictCourts) => {
+      let tempDay = new Date(new Date(dictCourts.Day).setHours(0, 0, 0, 0));
+      dictCourts.Day = new Date(new Date(dictCourts.Day).setHours(0, 0, 0, 0));
+      dictCourts.Courts.forEach((dictCourts) => {
+        dictCourts.Times.forEach((Time) => {
+          let dictTimeslot = {
+            From: new Date(),
+            To: new Date(),
+          };
+          let hoursFrom = parseInt(Time.Timeslot.split(" - ")[0].split(":")[0]);
+          let minutesFrom = parseInt(
+            Time.Timeslot.split(" - ")[0].split(":")[1]
+          );
+          let hoursTo = parseInt(Time.Timeslot.split(" - ")[1].split(":")[0]);
+          let minutesTo = parseInt(Time.Timeslot.split(" - ")[1].split(":")[1]);
+          dictTimeslot.From = new Date(
+            new Date(tempDay).setHours(hoursFrom, minutesFrom, 0, 0)
+          );
+          dictTimeslot.To = new Date(
+            new Date(tempDay).setHours(hoursTo, minutesTo, 0, 0)
+          );
+          Time.Timeslot = dictTimeslot;
+        });
+      });
+    });
+    let arrDictAvailableCourts = CheckForAvailableCourts(
+      arrDictURLsDays,
+      optionFromHour,
+      optionFromMinute,
+      optionToHour,
+      optionToMinute
+    );
+    let arrStrDictAvailableCourts = generateStringView(arrDictAvailableCourts);
+
+    return arrStrDictAvailableCourts;
+  },
+};

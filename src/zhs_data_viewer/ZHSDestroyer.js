@@ -48,16 +48,9 @@ function getDictTables(arrArrTables) {
           Timeslot: "",
         };
         dictTimes.State = elem.className;
-        if (elem.className.startsWith("avaliable")) {
-          dictTimes.Timeslot = elem.firstElementChild.innerHTML;
-        } else if (
-          elem.className != "ordered" &&
-          elem.className != "unAvaliable"
-        ) {
-          dictTimes.Timeslot = elem.innerHTML.split("<")[0];
-        } else {
-          dictTimes.Timeslot = elem.innerHTML;
-        }
+        const regex = /\d{2}:\d{2}\s-\s\d{2}:\d{2}/;
+        const matchResult = elem.innerHTML.match(regex);
+        dictTimes.Timeslot = matchResult[0];
         arrElemInfo.push(dictTimes);
       }
 
@@ -196,7 +189,7 @@ module.exports = {
       let arrDictTables = getDictTables(arrArrTables);
       dictCourts.Courts = arrDictTables;
     }
-
+    console.log(arrDictURLsDays);
     arrDictURLsDays.forEach((dictCourts) => {
       let tempDay = new Date(new Date(dictCourts.Day).setHours(0, 0, 0, 0));
       dictCourts.Day = new Date(new Date(dictCourts.Day).setHours(0, 0, 0, 0));

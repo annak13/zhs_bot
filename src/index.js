@@ -15,7 +15,9 @@ client.on("ready", async () => {
     arrCourts = await getAvailableCourts();
     let arrAnswer = getStrView(findDifferences(arrCourts, arrTempCourts));
 
-    console.log(Date.now());
+    let currentDate = new Date().toLocaleString();
+    console.log(currentDate);
+
     arrTempCourts = arrCourts;
     if (Array.isArray(arrAnswer) && arrAnswer.length) {
       for (let i = 0; i < arrAnswer.length; i++) {
@@ -31,8 +33,7 @@ client.commands = new Collection();
 const commandFiles = fs
   .readdirSync("./src/commands")
   .filter((file) => file.endsWith(".js"));
-console.log("tt");
-console.log(commandFiles);
+// console.log(commandFiles);
 
 commandFiles.forEach((commandFile) => {
   const command = require(`./commands/${commandFile}`);

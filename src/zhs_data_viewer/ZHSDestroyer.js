@@ -196,7 +196,6 @@ module.exports = {
       let arrDictTables = getDictTables(arrArrTables);
       dictCourts.Courts = arrDictTables;
     }
-    console.log(arrDictURLsDays);
     arrDictURLsDays.forEach((dictCourts) => {
       let tempDay = new Date(new Date(dictCourts.Day).setHours(0, 0, 0, 0));
       dictCourts.Day = new Date(new Date(dictCourts.Day).setHours(0, 0, 0, 0));

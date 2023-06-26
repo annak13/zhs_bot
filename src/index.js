@@ -30,12 +30,14 @@ client.on("ready", async () => {
       if (Array.isArray(arrAnswer) && arrAnswer.length && intIntervalLoop > 1 ) {
         for (let i = 0; i < arrAnswer.length; i++) {
           const answer = arrAnswer[i];
-          channel.send(answer);
+          console.log(answer);
+          //channel.send(answer);
         }
       }
     } else {
       dateLastTemp = await getLastDay();
-      channel.send('A new day is available for booking!');
+      console.log('A new day is available for booking!');
+      //channel.send('A new day is available for booking!');
     }
   }, waitMillseconds);
 });

@@ -18,10 +18,14 @@ async function getDocuments(arrURLs) {
 }
 
 async function getDocumentFromURL(strURL) {
-  let jsonResponse = await fetch(strURL);
-  let strHTML = await jsonResponse.text();
-  let doc = new JSDOM(strHTML);
-  return doc;
+  try {
+    let jsonResponse = await fetch(strURL);
+    let strHTML = await jsonResponse.text();
+    let doc = new JSDOM(strHTML);
+    return doc;
+  } catch (error) {
+    return;
+  }
 }
 
 function getTables(arrDocs) {
@@ -156,7 +160,9 @@ function getURLs(arrDates) {
 function generateStringView(arrDictAvailableCourts) {
   let arrView = [];
   arrDictAvailableCourts.forEach(function (dictAvailableCourts) {
+
     let strDay = String(dictAvailableCourts.Day.getDate()).padStart(2, "0");
+    let strDayName = dictAvailableCourts.Day.toLocaleDateString('de-DE', { weekday: 'short' }).replace(".", "");
     let strCourt = dictAvailableCourts.Court.replace(/\D/gim, "").padStart(
       2,
       "0"
@@ -168,7 +174,7 @@ function generateStringView(arrDictAvailableCourts) {
     let strMinute = String(
       dictAvailableCourts.Timeslot.From.getMinutes()
     ).padStart(2, "0");
-    arrView.push(strDay + "_" + strCourt + "_" + strHour + strMinute);
+    arrView.push( strDayName + " " + strDay + ". " + strHour + ":" + strMinute + " Nr " + strCourt);
   });
   
   return arrView;
@@ -190,7 +196,6 @@ module.exports = {
       const dictCourts = arrDictURLsDays[i];
       let docsTemp = getDocuments(dictCourts.Courts);
       if (docsTemp) arrRequests.push(docsTemp);
-
     }
     let arrArrDocs = await Promise.all(arrRequests);
     if ((arrArrDocs.filter((subArray) => subArray.length > 0)).length !== arrDictURLsDays.length) return [];

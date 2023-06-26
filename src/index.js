@@ -1,6 +1,6 @@
 require("dotenv").config();
 const fs = require("fs");
-const { getAvailableCourts } = require("./zhs_data_viewer/ZHSDestroyer.js");
+const { getAvailableCourts, getLastDay } = require("./zhs_data_viewer/ZHSDestroyer.js");
 
 const { Client, Collection } = require("discord.js");
 
@@ -10,27 +10,41 @@ client.on("ready", async () => {
   var waitMillseconds = 5 * 60000;
   let arrCourts = [];
   let arrTempCourts = [];
+  let intIntervalLoop = 0;
+  let dateLast = await getLastDay();
+  let dateLastTemp = await getLastDay();
   const channel = await client.channels.fetch(process.env.CHANNEL_ID);
   setInterval(async function () {
     arrCourts = await getAvailableCourts();
-    let arrAnswer = getStrView(findDifferences(arrCourts, arrTempCourts));
-
+    let arrAnswer;
+    if (arrCourts && arrCourts.length > 0) {
+      arrAnswer = getStrView(findDifferences(arrCourts, arrTempCourts));
+      arrTempCourts = arrCourts;
+    }
     let currentDate = new Date().toLocaleString();
-    console.log(currentDate);
-
-    arrTempCourts = arrCourts;
-    if (Array.isArray(arrAnswer) && arrAnswer.length) {
-      for (let i = 0; i < arrAnswer.length; i++) {
-        const answer = arrAnswer[i];
-        channel.send(answer);
+    intIntervalLoop++;
+    console.log('Interval Nr.: ' + intIntervalLoop + ', Date: ' + currentDate);
+   
+    dateLast = await getLastDay();
+    if (dateLast.getTime() <= dateLastTemp.getTime()) {
+      if (Array.isArray(arrAnswer) && arrAnswer.length && intIntervalLoop > 1 ) {
+        for (let i = 0; i < arrAnswer.length; i++) {
+          const answer = arrAnswer[i];
+          console.log(answer);
+          //channel.send(answer);
+        }
       }
+    } else {
+      dateLastTemp = await getLastDay();
+      console.log('A new day is available for booking!');
+      //channel.send('A new day is available for booking!');
     }
   }, waitMillseconds);
 });
 
 client.commands = new Collection();
 
-const commandFiles = fs
+/*const commandFiles = fs
   .readdirSync("./src/commands")
   .filter((file) => file.endsWith(".js"));
 // console.log(commandFiles);
@@ -40,7 +54,7 @@ commandFiles.forEach((commandFile) => {
   client.commands.set(command.data.name, command);
   console.log(commandFile);
   console.log("nd of commands");
-});
+});*/
 
 client.once("ready", () => {
   console.log("Ready!");

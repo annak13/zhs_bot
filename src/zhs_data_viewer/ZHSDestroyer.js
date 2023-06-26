@@ -6,10 +6,15 @@ async function getDocuments(arrURLs) {
   for (let i = 0; i < arrURLs.length; i++) {
     const strURL = arrURLs[i];
     let docTemp = getDocumentFromURL(strURL);
-    if (docTemp) promiseArrDocs.push(getDocumentFromURL(strURL));
+    if (docTemp) promiseArrDocs.push(docTemp);
   }
   let arrDocs = await Promise.all(promiseArrDocs);
-  return arrDocs;
+  if (arrURLs.length !== (arrDocs.filter((element) => element !== undefined)).length) {
+    return [];
+  }else {
+    return arrDocs;
+  }
+  
 }
 
 async function getDocumentFromURL(strURL) {
@@ -26,8 +31,10 @@ async function getDocumentFromURL(strURL) {
 function getTables(arrDocs) {
   let arrArrTables = [];
   arrDocs.forEach(function (doc) {
-    let arrTables = doc.window.document.getElementsByClassName("areaPeriods");
-    arrArrTables.push(arrTables);
+    if (doc) {
+      let arrTables = doc.window.document.getElementsByClassName("areaPeriods");
+      arrArrTables.push(arrTables);
+    }
   });
   return arrArrTables;
 }
@@ -183,17 +190,22 @@ module.exports = {
   ) {
     let arrDates = getArrayOfDays(optionDays);
     let arrDictURLsDays = getURLs(arrDates);
+    let dateLast = new Date(arrDictURLsDays[arrDictURLsDays.length]);
     let arrRequests = [];
     for (let i = 0; i < arrDictURLsDays.length; i++) {
       const dictCourts = arrDictURLsDays[i];
-      if (getDocuments(dictCourts.Courts)) arrRequests.push(getDocuments(dictCourts.Courts));
+      let docsTemp = getDocuments(dictCourts.Courts);
+      if (docsTemp) arrRequests.push(docsTemp);
     }
     let arrArrDocs = await Promise.all(arrRequests);
+    if ((arrArrDocs.filter((subArray) => subArray.length > 0)).length !== arrDictURLsDays.length) return [];
 
     for (let i = 0; i < arrDictURLsDays.length; i++) {
       const dictCourts = arrDictURLsDays[i];
-      let arrArrTables = getTables(arrArrDocs[i]);
-      let arrDictTables = getDictTables(arrArrTables);
+      let arrArrTables;
+      if (arrArrDocs[i]) arrArrTables = getTables(arrArrDocs[i]);
+      let arrDictTables;
+      if (arrArrTables)  arrDictTables = getDictTables(arrArrTables);
       dictCourts.Courts = arrDictTables;
     }
     arrDictURLsDays.forEach((dictCourts) => {
@@ -231,5 +243,14 @@ module.exports = {
     let arrStrDictAvailableCourts = generateStringView(arrDictAvailableCourts);
 
     return arrStrDictAvailableCourts;
+  },
+  async getLastDay(
+    optionDays = [0, 1, 2, 3, 4, 5, 6]
+  ) {
+    let arrDates = getArrayOfDays(optionDays);
+    let arrDictURLsDays = getURLs(arrDates);
+    let dateLast = new Date(arrDictURLsDays[arrDictURLsDays.length - 1].Day);
+    dateLast.setHours(0, 0, 0, 0);
+    return dateLast;
   },
 };

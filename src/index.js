@@ -1,6 +1,6 @@
 require("dotenv").config();
 const fs = require("fs");
-const { getAvailableCourts, getLastDay } = require("./zhs_data_viewer/ZHSDestroyer.js");
+const { getAvailableCourts, getLastDay, crossoutBookedCourts, revcrossoutAvailableCourts } = require("./zhs_data_viewer/ZHSDestroyer.js");
 
 const { Client, Collection } = require("discord.js");
 
@@ -17,15 +17,22 @@ client.on("ready", async () => {
   setInterval(async function () {
     arrCourts = await getAvailableCourts();
     let arrAnswer;
+    let arrBooked;
     if (arrCourts && arrCourts.length > 0) {
-      arrAnswer = getStrView(findDifferences(arrCourts, arrTempCourts));
+      arrAnswer = getNewCourts(arrCourts, arrTempCourts);
+      await revcrossoutAvailableCourts(30, channel, arrCourts);
+      arrAnswer = getStrView(getNewCourts(arrCourts, arrTempCourts));
+      arrBooked = getBookedCourts(arrCourts, arrTempCourts);
+      await crossoutBookedCourts(30, channel, arrBooked);
       arrTempCourts = arrCourts;
     }
     let currentDate = new Date().toLocaleString();
     intIntervalLoop++;
+
     console.log('Interval Nr.: ' + intIntervalLoop + ', Date: ' + currentDate);
-   
+    
     dateLast = await getLastDay();
+    
     if (dateLast.getTime() <= dateLastTemp.getTime()) {
       if (Array.isArray(arrAnswer) && arrAnswer.length && intIntervalLoop > 1 ) {
         for (let i = 0; i < arrAnswer.length; i++) {
@@ -104,6 +111,10 @@ function getStrView(arrAnswer) {
   return arrStrView;
 }
 
-function findDifferences(arrFst, arrSnd) {
+function getNewCourts(arrFst, arrSnd) {
   return arrFst.filter((x) => !arrSnd.includes(x));
+}
+
+function getBookedCourts(arrFst, arrSnd) {
+  return arrSnd.filter((x) => !arrFst.includes(x));
 }

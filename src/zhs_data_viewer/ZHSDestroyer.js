@@ -93,7 +93,8 @@ function CheckForAvailableCourts(
           dictTimes.Timeslot.From >=
             dayTemp.setHours(optionFromHour, optionFromMinute) &&
           dictTimes.Timeslot.To <=
-            dayTemp.setHours(optionToHour, optionToMinute)
+            dayTemp.setHours(optionToHour, optionToMinute) &&
+            dictTimes.Timeslot.From.getTime() >= new Date().getTime()
         ) {
           let dictAvailableCourt = {
             Day: new Date(),
@@ -253,4 +254,31 @@ module.exports = {
     dateLast.setHours(0, 0, 0, 0);
     return dateLast;
   },
+  async crossoutBookedCourts(intMsgFetchLimit, channel, arrBooked) {
+    let collMSG = await channel.messages.fetch({limit: intMsgFetchLimit});
+    let arrayMSG = Array.from(collMSG);
+    for (let i = 0; i < arrayMSG.length; i++) {
+      const msg = await channel.messages.fetch(arrayMSG[i][0]);
+      for (let j = 0; j < arrBooked.length; j++) {
+        const courtBooked = arrBooked[j];
+        if (msg.content.includes(courtBooked) && !msg.content.includes('~~' + courtBooked + '~~')) {
+          await msg.edit(msg.content.replace(courtBooked, '~~' + courtBooked + '~~'));
+        }
+      } 
+    }
+  },
+  async revcrossoutAvailableCourts(intMsgFetchLimit, channel, arrCourts) {
+    let collMSG = await channel.messages.fetch({limit: intMsgFetchLimit});
+    let arrayMSG = Array.from(collMSG);
+    for (let i = 0; i < arrayMSG.length; i++) {
+      const msg = await channel.messages.fetch(arrayMSG[i][0]);
+      for (let j = 0; j < arrCourts.length; j++) {
+        const courtAvailable = arrCourts[j];
+        if (msg.content.includes(courtAvailable) && msg.content.includes('~~' + courtAvailable + '~~')) {
+          await msg.edit(msg.content.replace('~~' + courtAvailable + '~~', courtAvailable));
+        }
+      } 
+    }
+  },
+  
 };

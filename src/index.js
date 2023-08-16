@@ -15,6 +15,7 @@ client.on("ready", async () => {
   let dateLastTemp = await getLastDay();
   const channel = await client.channels.fetch(process.env.CHANNEL_ID);
   setInterval(async function () {
+    try {
     arrCourts = await getAvailableCourts();
     let arrAnswer;
     let arrBooked;
@@ -46,7 +47,11 @@ client.on("ready", async () => {
       //console.log('A new day is available for booking!');
       channel.send('A new day is available for booking!');
     }
-  }, waitMillseconds);
+  }
+  catch (error) {
+    console.log('Error ' + error + ' was thrown at ' + new Date().toLocaleString());
+  }}
+  , waitMillseconds);
 });
 
 client.commands = new Collection();

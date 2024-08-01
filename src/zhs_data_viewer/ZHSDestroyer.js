@@ -146,7 +146,7 @@ function getURLs(arrDates) {
     };
     arrPages.forEach(function (pageNumber) {
       var strURL =
-        "https://ssl.forumedia.eu/zhs-courtbuchung.de/reservations.php?action=showReservations&type_id=1&date=" +
+        "https://zhs-courtbuchung.de/reservations.php?action=showReservations&type_id=1&date=" +
         date +
         "&page=" +
         pageNumber;
